@@ -22,11 +22,17 @@ public class Indio : MonoBehaviour
 
     public GameObject bulletPrefab;
     public Transform firePoint;
+    public Animator anim;
+    public float animSpeed;
+    public float animDelay;
+    public GameObject lance;
+    public AudioSource throwBulletAudio;
 
     // Use this for initialization
     void Start()
     {
         InvokeRepeating("UpdateTarget", 0f, 0.5f);
+        anim.speed = animSpeed;
     }
 
     void UpdateTarget()
@@ -60,6 +66,9 @@ public class Indio : MonoBehaviour
     {
         if (target == null)
         {
+            fireCountdown -= Time.deltaTime;
+            if (fireCountdown < 0)
+                fireCountdown = 0;
             return;
         }
 
@@ -70,15 +79,20 @@ public class Indio : MonoBehaviour
 
         if (fireCountdown <= 0f)
         {
-            Shoot();
+            AnimAttackStart();
+            Invoke("Shoot", animDelay);
+            //Shoot();
             fireCountdown = 1f / fireRate;
         }
-
         fireCountdown -= Time.deltaTime;
+        
     }
 
     void Shoot()
     {
+        throwBulletAudio.Play();
+        lance.gameObject.SetActive(false);
+        Invoke("ShowLance", 0.4f);
         GameObject bulletGO = (GameObject)Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
         Bullet bullet = bulletGO.GetComponent<Bullet>();
 
@@ -86,6 +100,22 @@ public class Indio : MonoBehaviour
         {
             bullet.Seek(target);
         }
+    }
+    
+    void AnimAttackStart()
+    {
+        anim.Play("attack");
+        Invoke("AnimAttackStop", 0.1f);
+    }
+
+    void AnimAttackStop()
+    {
+        anim.SetBool("attack", false);
+    }
+
+    void ShowLance()
+    {
+        lance.gameObject.SetActive(true);
     }
 
     void OnDrawGizmosSelected()

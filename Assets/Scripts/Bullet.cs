@@ -6,6 +6,7 @@ public class Bullet : MonoBehaviour {
 
     public float speed = 70f;
     public GameObject impactEffect;
+    public AudioSource impactAudio;
 
     public void Seek(Transform _target)
     {
@@ -31,12 +32,13 @@ public class Bullet : MonoBehaviour {
         }
 
         transform.Translate(dir.normalized * distanceThisFrame, Space.World);
-
+        this.transform.LookAt(target);
 
 	}
 
     void HitTarget()
     {
+        impactAudio.Play();
         GameObject effectIns = (GameObject)Instantiate(impactEffect, transform.position, transform.rotation);
         Destroy(effectIns, 2f);
         Destroy(target.gameObject);
